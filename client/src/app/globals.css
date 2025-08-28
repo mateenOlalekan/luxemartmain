@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+
+/* Font families - make sure to match with font config in layout.tsx */
+:root {
+  --font-jost: 'Jost', sans-serif;
+  --font-oxanium: 'Oxanium', cursive;
+}
+
+/* Apply global font family */
+html, body {
+  font-family: var(--font-jost);
+  scroll-behavior: smooth;
+}
+
+/* General resets and body defaults */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #1f2937; /* Tailwind's gray-900 */
+}
+
+/* Global link styles */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #2563eb; /* Tailwind's blue-600 */
+}
+
