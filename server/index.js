@@ -1,55 +1,38 @@
-import express from "express";
-import dotenv from "dotenv";
-dotenv.config();
-import cookieParser from "cookie-parser";
-import helmet from "helmet";
-import cors from "cors";
-import rateLimit from "express-rate-limit";
-import { connectDB } from "./config/configDb.js";
-import authRoutes from "./routes/auth.js";
-import productsRoutes from "./routes/products.js";
-import { notFound, errorHandler } from "./middleware/errorHandler.js";
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const morgan = require("morgan");
+const { connectDB } = require("./config/db.js");
+const userRoutes = require("./routes/userRoutes.js");
+const productRoutes = require("./routes/productRoutes.js");
+const { errorHandler, notFound } = require("./middleware/errorMiddleware.js");
+const { logger } = require("./middleware/logger.js");
 
+dotenv.config();
+const PORT = process.env.PORT || 5000;
 const app = express();
 
-// connect DB
-await connectDB(process.env.MONGO_URI);
+// connect database
+connectDB();
 
-// Middlewares
-app.use(helmet());
+// middlewares
+app.use(cors());
 app.use(express.json());
-app.use(cookieParser());
 
-const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000").split(",");
-app.use(cors({
-  origin: (origin, callback) => {
-    // allow requests with no origin (e.g., curl, mobile apps)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true
-}));
+// request logging
+app.use(morgan("dev"));
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 120
-});
-app.use(limiter);
+// custom logger
+app.use(logger);
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productsRoutes);
+// routes
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
 
-// health check
-app.get("/api/health", (req, res) => res.json({ ok: true }));
-
-// error handling
+// 404 + error handlers
 app.use(notFound);
 app.use(errorHandler);
 
-// start
-const PORT = process.env.PORT || 6880;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port : ${PORT}`);
 });
